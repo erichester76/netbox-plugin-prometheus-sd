@@ -33,12 +33,12 @@ def extract_location(obj, labels: LabelDict):
     if hasattr(obj, "scope") and obj.scope:
         scope = obj.scope
         if hasattr(scope, "location") and scope.location:
-            labels["location"] = scope.location.name
-            labels["location_slug"] = scope.location.slug
+            labels["scope"] = scope.location.name
+            labels["scope_slug"] = scope.location.slug
         # Site might also come from scope if applicable
         if hasattr(scope, "site") and scope.site:
-            labels["site"] = scope.site.name
-            labels["site_slug"] = scope.site.slug
+            labels["scope"] = scope.site.name
+            labels["scope_slug"] = scope.site.slug
     else:
         # Fallback to pre-4.2 direct fields
         if hasattr(obj, "location") and obj.location:
@@ -89,8 +89,8 @@ def extract_cluster(obj, labels: LabelDict):
     if hasattr(obj, "scope") and obj.scope:
         scope = obj.scope
         if hasattr(scope, "site") and scope.site:
-            labels["site"] = scope.site.name
-            labels["site_slug"] = scope.site.slug
+            labels["scope"] = scope.site.name
+            labels["scope_slug"] = scope.site.slug
     # Fallback to pre-4.2 direct obj.site
     elif hasattr(obj, "site") and obj.site is not None:
         labels["site"] = obj.site.name
