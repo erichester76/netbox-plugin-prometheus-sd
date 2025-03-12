@@ -78,8 +78,11 @@ def extract_cluster(obj, labels: LabelDict):
         if hasattr(obj.cluster, "scope") and obj.cluster.scope:
             scope = obj.cluster.scope
             if hasattr(scope, "site") and scope.site:
-                labels["site"] = scope.site.name
-                labels["site_slug"] = scope.site.slug
+                labels["scope"] = scope.site.name
+                labels["scope_slug"] = scope.site.slug
+            if hasattr(scope, "location") and scope.location:
+                labels["scope"] = scope.location.name
+                labels["scope_slug"] = scope.location.slug
         # Fallback to pre-4.2 direct cluster site
         elif hasattr(obj.cluster, "site") and obj.cluster.site:
             labels["site"] = obj.cluster.site.name
