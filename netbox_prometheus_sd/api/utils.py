@@ -29,9 +29,25 @@ def extract_description(obj, labels: LabelDict):
 
 def extract_location(obj, labels: LabelDict):
     """Extract location"""
-    if hasattr(obj, "location") and obj.location:
-        labels["location"] = obj.location.name
-        labels["location_slug"] = obj.location.slug
+    # Check for NetBox 4.2+ scope field
+    if hasattr(obj, "scope") and obj.scope:
+        scope = obj.scope
+        if hasattr(scope, "location") and scope.location:
+            labels["location"] = scope.location.name
+            labels["location_slug"] = scope.location.slug
+        # Site might also come from scope if applicable
+        if hasattr(scope, "site") and scope.site:
+            labels["site"] = scope.site.name
+            labels["site_slug"] = scope.site.slug
+    else:
+        # Fallback to pre-4.2 direct fields
+        if hasattr(obj, "location") and obj.location:
+            labels["location"] = obj.location.name
+            labels["location_slug"] = obj.location.slug
+        # Site isn’t directly in extract_location originally, but included for consistency
+        if hasattr(obj, "site") and obj.site:
+            labels["site"] = obj.site.name
+            labels["site_slug"] = obj.site.slug
 
 
 def extract_tags(obj, labels):
@@ -58,12 +74,25 @@ def extract_cluster(obj, labels: LabelDict):
             labels["cluster_group"] = obj.cluster.group.name
         if obj.cluster.type:
             labels["cluster_type"] = obj.cluster.type.name
-        if obj.cluster.site:
+        # Check for scope on cluster (NetBox 4.2+)
+        if hasattr(obj.cluster, "scope") and obj.cluster.scope:
+            scope = obj.cluster.scope
+            if hasattr(scope, "site") and scope.site:
+                labels["site"] = scope.site.name
+                labels["site_slug"] = scope.site.slug
+        # Fallback to pre-4.2 direct cluster site
+        elif hasattr(obj.cluster, "site") and obj.cluster.site:
             labels["site"] = obj.cluster.site.name
             labels["site_slug"] = obj.cluster.site.slug
 
-    # Has precedence over cluster site
-    if hasattr(obj, "site") and obj.site is not None:
+    # Has precedence over cluster site; check scope for obj.site (NetBox 4.2+)
+    if hasattr(obj, "scope") and obj.scope:
+        scope = obj.scope
+        if hasattr(scope, "site") and scope.site:
+            labels["site"] = scope.site.name
+            labels["site_slug"] = scope.site.slug
+    # Fallback to pre-4.2 direct obj.site
+    elif hasattr(obj, "site") and obj.site is not None:
         labels["site"] = obj.site.name
         labels["site_slug"] = obj.site.slug
 
